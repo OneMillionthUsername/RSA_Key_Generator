@@ -17,9 +17,10 @@ using System.Security.Cryptography;
 namespace RSA_Key_Generator {
 	public partial class MainWindow : Window {
 
-		static readonly UnicodeEncoding ByteConverter = new();
-		public static int KeySize { get; set; }
-		private byte[] DataToEncrypt;
+		private static readonly UnicodeEncoding ByteConverter = new();
+		private static readonly RSACryptoServiceProvider rSA = new(KeySize);
+		private static int KeySize { get; set; }
+
 		private byte[] EncryptedData;
 		private byte[] DecryptedData;
 
@@ -70,14 +71,12 @@ namespace RSA_Key_Generator {
 			}
 		}
 		private void btnEncrypt_Click(object sender, RoutedEventArgs e) {
-			using (RSACryptoServiceProvider rSA = new(KeySize)) {
-				DataToEncrypt = ByteConverter.GetBytes(Message_to_encrypt.Text.ToCharArray());
-				EncryptedData = RSAEncrypt(DataToEncrypt, rSA.ExportParameters(false), false);
-				DecryptedData = RSADecrypt(EncryptedData, rSA.ExportParameters(true), false);
-				encrypted_Message.Text = Convert.ToBase64String(EncryptedData); 
-			}
+			byte[] DataToEncrypt = ByteConverter.GetBytes(Message_to_encrypt.Text.ToCharArray());
+			EncryptedData = RSAEncrypt(DataToEncrypt, rSA.ExportParameters(false), false);
+			encrypted_Message.Text = Convert.ToBase64String(EncryptedData); 
 		}
 		private void btnDecryptMessage_Click(object sender, RoutedEventArgs e) {
+			DecryptedData = RSADecrypt(EncryptedData, rSA.ExportParameters(true), false);
 			Decrypted_message.Text = ByteConverter.GetString(DecryptedData);
 		}
 		private void btnGenerateRSAKey_Click(object sender, RoutedEventArgs e) {
